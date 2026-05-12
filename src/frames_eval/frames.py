@@ -238,8 +238,10 @@ def frames_socrates(max_hops: int = 10) -> Task:
             state.tools = [request_document()]
             state.tool_choice = "auto"
 
+            # Use tool_calls="single" so each generate() call processes exactly
+            # one model response — letting us count hops and enforce max_hops.
             for hop in range(max_hops):
-                state = await generate_fn(state)
+                state = await generate_fn(state, tool_calls="single")
                 if not _has_pending_tool_call(state) or hop == max_hops - 1:
                     state.metadata["hops_taken"] = hop + 1
                     break
